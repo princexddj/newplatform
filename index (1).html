@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BetterDeed - Video Sharing Platform</title>
+    <meta name="description" content="Share and watch videos on BetterDeed">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #6a0dad;
+            --secondary-color: #9b59b6;
+            --dark-color: #121212;
+            --light-color: #f8f8f8;
+            --accent-color: #bb86fc;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-color);
+            color: var(--light-color);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--primary-color);
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+
+        .hamburger {
+            cursor: pointer;
+            font-size: 24px;
+            color: var(--accent-color);
+            background: none;
+            border: none;
+        }
+
+        .admin-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 350px;
+            height: 100vh;
+            background-color: #1e1e1e;
+            padding: 20px;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);
+            transition: right 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .admin-panel.active {
+            right: 0;
+        }
+
+        .admin-panel h2 {
+            color: var(--accent-color);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .admin-panel .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--light-color);
+        }
+
+        .admin-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .admin-form input, .admin-form textarea, .admin-form .file-input-label {
+            padding: 10px;
+            background-color: #2d2d2d;
+            border: 1px solid var(--primary-color);
+            color: var(--light-color);
+            border-radius: 5px;
+        }
+
+        .admin-form .file-input {
+            display: none;
+        }
+
+        .admin-form .file-input-label {
+            display: block;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .admin-form .file-input-label:hover {
+            background-color: #3d3d3d;
+        }
+
+        .admin-form .file-name {
+            font-size: 12px;
+            margin-top: 5px;
+            color: #b3b3b3;
+        }
+
+        .admin-form button {
+            padding: 10px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .admin-form button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .links-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .link-card {
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .link-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(106, 13, 173, 0.3);
+        }
+
+        .thumbnail {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+
+        .link-info {
+            padding: 15px;
+        }
+
+        .link-title {
+            font-size: 18px;
+            margin-bottom: 5px;
+            color: var(--accent-color);
+        }
+
+        .link-desc {
+            font-size: 14px;
+            color: #b3b3b3;
+        }
+
+        .video-player {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .video-player.active {
+            display: flex;
+        }
+
+        .video-container {
+            width: 90%;
+            max-width: 900px;
+            position: relative;
+        }
+
+        .video-container video {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .close-video {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            font-size: 30px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .auth-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .auth-modal.active {
+            display: flex;
+        }
+
+        .auth-box {
+            background-color: #1e1e1e;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .auth-box h2 {
+            color: var(--accent-color);
+            margin-bottom: 20px;
+        }
+
+        .auth-box input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            background-color: #2d2d2d;
+            border: 1px solid var(--primary-color);
+            color: var(--light-color);
+            border-radius: 5px;
+        }
+
+        .auth-box button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .auth-box button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .error-message {
+            color: #ff6b6b;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .ad-space {
+            width: 100%;
+            height: 100px;
+            background-color: #2d2d2d;
+            border: 1px dashed var(--primary-color);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #b3b3b3;
+            margin: 15px 0;
+        }
+
+        .ad-space.video-ad {
+            width: 90%;
+            max-width: 900px;
+            height: 60px;
+            margin: 20px auto;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+            color: var(--accent-color);
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #b3b3b3;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #2d2d2d;
+            color: #b3b3b3;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .admin-panel {
+                width: 100%;
+                right: -100%;
+            }
+            
+            .admin-panel.active {
+                right: 0;
+            }
+            
+            .thumbnail {
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="#" class="logo">BetterDeed</a>
+            <button class="hamburger" id="hamburger">
+                <i class="fas fa-bars"></i>
+            </button>
+        </header>
+
+        <div class="links-container" id="linksContainer">
+            <!-- Video links and ads will be dynamically added here -->
+        </div>
+
+        <div class="loading" id="loading">
+            <i class="fas fa-spinner fa-spin"></i> Loading videos...
+        </div>
+
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <i class="fas fa-video-slash" style="font-size: 48px; margin-bottom: 15px;"></i>
+            <h3>No Videos Available</h3>
+            <p>Check back later or upload videos using the admin panel</p>
+        </div>
+
+        <footer>
+            <p>&copy; 2023 BetterDeed. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Admin Panel -->
+    <div class="admin-panel" id="adminPanel">
+        <span class="close-btn" id="closeAdminPanel">&times;</span>
+        <h2>Admin Panel</h2>
+        <form class="admin-form" id="videoForm">
+            <input type="text" id="videoTitle" placeholder="Video Title" required>
+            <textarea id="videoDescription" placeholder="Video Description"></textarea>
+            
+            <label for="videoUpload" class="file-input-label">
+                <i class="fas fa-upload"></i> Upload Video File
+                <input type="file" id="videoUpload" class="file-input" accept="video/*" required>
+                <div id="videoFileName" class="file-name">No file selected</div>
+            </label>
+            
+            <label for="thumbnailUpload" class="file-input-label">
+                <i class="fas fa-image"></i> Upload Thumbnail
+                <input type="file" id="thumbnailUpload" class="file-input" accept="image/*" required>
+                <div id="thumbnailFileName" class="file-name">No file selected</div>
+            </label>
+            
+            <button type="submit" id="submitBtn">Add Video</button>
+        </form>
+        <div class="video-list" id="adminVideoList">
+            <!-- Admin video list will be added here -->
+        </div>
+    </div>
+
+    <!-- Video Player -->
+    <div class="video-player" id="videoPlayer">
+        <div class="ad-space video-ad">Advertisement</div>
+        <div class="video-container">
+            <span class="close-video" id="closeVideo">&times;</span>
+            <video controls id="currentVideo"></video>
+        </div>
+        <div class="ad-space video-ad">Advertisement</div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div class="auth-modal" id="authModal">
+        <div class="auth-box">
+            <h2>Admin Access</h2>
+            <input type="password" id="adminCode" placeholder="Enter Access Code">
+            <button id="submitCode">Submit</button>
+            <p class="error-message" id="errorMessage"></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const hamburger = document.getElementById('hamburger');
+            const adminPanel = document.getElementById('adminPanel');
+            const closeAdminPanel = document.getElementById('closeAdminPanel');
+            const authModal = document.getElementById('authModal');
+            const submitCode = document.getElementById('submitCode');
+            const adminCode = document.getElementById('adminCode');
+            const errorMessage = document.getElementById('errorMessage');
+            const videoForm = document.getElementById('videoForm');
+            const linksContainer = document.getElementById('linksContainer');
+            const videoPlayer = document.getElementById('videoPlayer');
+            const currentVideo = document.getElementById('currentVideo');
+            const closeVideo = document.getElementById('closeVideo');
+            const adminVideoList = document.getElementById('adminVideoList');
+            const videoUpload = document.getElementById('videoUpload');
+            const thumbnailUpload = document.getElementById('thumbnailUpload');
+            const videoFileName = document.getElementById('videoFileName');
+            const thumbnailFileName = document.getElementById('thumbnailFileName');
+            const loading = document.getElementById('loading');
+            const emptyState = document.getElementById('emptyState');
+            const submitBtn = document.getElementById('submitBtn');
+
+            // Initialize videos array from localStorage or create sample data
+            let videos = JSON.parse(localStorage.getItem('betterDeedVideos')) || [];
+            
+            // Show loading state initially
+            loading.classList.add('active');
+            
+            // Simulate loading delay (remove in production)
+            setTimeout(() => {
+                loading.classList.remove('active');
+                if (videos.length === 0) {
+                    emptyState.style.display = 'block';
+                }
+                renderVideos();
+                renderAdminVideoList();
+            }, 800);
+
+            // File input handlers
+            videoUpload.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    videoFileName.textContent = this.files[0].name;
+                } else {
+                    videoFileName.textContent = 'No file selected';
+                }
+            });
+
+            thumbnailUpload.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    thumbnailFileName.textContent = this.files[0].name;
+                } else {
+                    thumbnailFileName.textContent = 'No file selected';
+                }
+            });
+
+            // Render videos with ads
+            function renderVideos() {
+                linksContainer.innerHTML = '';
+                
+                if (videos.length === 0) {
+                    emptyState.style.display = 'block';
+                    return;
+                } else {
+                    emptyState.style.display = 'none';
+                }
+                
+                // Sort videos by timestamp (newest first)
+                const sortedVideos = [...videos].sort((a, b) => b.timestamp - a.timestamp);
+                
+                sortedVideos.forEach((video, index) => {
+                    // Add ad after every 2 videos
+                    if (index > 0 && index % 2 === 0) {
+                        const adSpace = document.createElement('div');
+                        adSpace.className = 'ad-space';
+                        adSpace.textContent = 'Advertisement';
+                        linksContainer.appendChild(adSpace);
+                    }
+                    
+                    const videoCard = document.createElement('div');
+                    videoCard.className = 'link-card';
+                    videoCard.innerHTML = `
+                        <img src="${video.thumbnail}" alt="${video.title}" class="thumbnail">
+                        <div class="link-info">
+                            <h3 class="link-title">${video.title}</h3>
+                            <p class="link-desc">${video.description}</p>
+                        </div>
+                    `;
+                    videoCard.addEventListener('click', () => playVideo(video.url, video.title));
+                    linksContainer.appendChild(videoCard);
+                });
+            }
+
+            // Render admin video list
+            function renderAdminVideoList() {
+                adminVideoList.innerHTML = '<h3 style="margin: 20px 0 10px; color: var(--accent-color);">Current Videos</h3>';
+                if (videos.length === 0) {
+                    adminVideoList.innerHTML += '<p>No videos added yet</p>';
+                    return;
+                }
+                
+                // Sort by newest first for admin panel too
+                const sortedVideos = [...videos].sort((a, b) => b.timestamp - a.timestamp);
+                
+                sortedVideos.forEach((video) => {
+                    const videoItem = document.createElement('div');
+                    videoItem.style.marginBottom = '15px';
+                    videoItem.style.padding = '10px';
+                    videoItem.style.backgroundColor = '#2d2d2d';
+                    videoItem.style.borderRadius = '5px';
+                    videoItem.innerHTML = `
+                        <p><strong>${video.title}</strong></p>
+                        <small>${new Date(video.timestamp).toLocaleString()}</small>
+                        <button class="delete-btn" data-id="${video.id}" style="margin-top: 5px; padding: 5px 10px; background-color: #ff4757; color: white; border: none; border-radius: 3px; cursor: pointer;">Delete</button>
+                    `;
+                    adminVideoList.appendChild(videoItem);
+                });
+
+                // Add event listeners to delete buttons
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = parseInt(this.getAttribute('data-id'));
+                        deleteVideo(id);
+                    });
+                });
+            }
+
+            // Play video
+            function playVideo(url, title) {
+                currentVideo.src = url;
+                currentVideo.poster = ''; // Clear poster if any
+                document.title = `${title} | BetterDeed`;
+                videoPlayer.classList.add('active');
+                currentVideo.play().catch(e => console.log('Autoplay prevented:', e));
+            }
+
+            // Delete video
+            function deleteVideo(id) {
+                const videoToDelete = videos.find(v => v.id === id);
+                if (videoToDelete) {
+                    // Revoke object URLs to free memory
+                    URL.revokeObjectURL(videoToDelete.url);
+                    URL.revokeObjectURL(videoToDelete.thumbnail);
+                }
+                
+                videos = videos.filter(video => video.id !== id);
+                localStorage.setItem('betterDeedVideos', JSON.stringify(videos));
+                
+                renderVideos();
+                renderAdminVideoList();
+                
+                // Reset document title if deleted video was being played
+                if (currentVideo.src.includes(videoToDelete.url)) {
+                    document.title = 'BetterDeed';
+                    videoPlayer.classList.remove('active');
+                }
+            }
+
+            // Toggle admin panel
+            hamburger.addEventListener('click', function() {
+                authModal.classList.add('active');
+                adminCode.focus();
+            });
+
+            closeAdminPanel.addEventListener('click', function() {
+                adminPanel.classList.remove('active');
+            });
+
+            closeVideo.addEventListener('click', function() {
+                videoPlayer.classList.remove('active');
+                currentVideo.pause();
+                currentVideo.currentTime = 0;
+                document.title = 'BetterDeed';
+            });
+
+            // Submit admin code
+            submitCode.addEventListener('click', function() {
+                if (adminCode.value === 'publisher#192006') {
+                    authModal.classList.remove('active');
+                    adminPanel.classList.add('active');
+                    errorMessage.textContent = '';
+                    adminCode.value = '';
+                } else {
+                    errorMessage.textContent = 'Incorrect access code';
+                }
+            });
+
+            // Handle Enter key in admin code input
+            adminCode.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    submitCode.click();
+                }
+            });
+
+            // Handle video form submission
+            videoForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const title = document.getElementById('videoTitle').value.trim();
+                const description = document.getElementById('videoDescription').value.trim();
+                const videoFile = videoUpload.files[0];
+                const thumbnailFile = thumbnailUpload.files[0];
+                
+                if (!videoFile || !thumbnailFile) {
+                    alert('Please select both a video and thumbnail file');
+                    return;
+                }
+                
+                if (!title) {
+                    alert('Please enter a video title');
+                    return;
+                }
+                
+                // Disable submit button during processing
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+                
+                try {
+                    // Generate ID
+                    const id = videos.length > 0 ? Math.max(...videos.map(v => v.id)) + 1 : 1;
+                    
+                    // Create object URLs for the files
+                    const videoUrl = URL.createObjectURL(videoFile);
+                    const thumbnailUrl = URL.createObjectURL(thumbnailFile);
+                    
+                    // Add to beginning of array (newest first)
+                    videos.unshift({
+                        id,
+                        title,
+                        url: videoUrl,
+                        thumbnail: thumbnailUrl,
+                        description,
+                        timestamp: Date.now()
+                    });
+                    
+                    localStorage.setItem('betterDeedVideos', JSON.stringify(videos));
+                    
+                    // Reset form
+                    videoForm.reset();
+                    videoFileName.textContent = 'No file selected';
+                    thumbnailFileName.textContent = 'No file selected';
+                    
+                    // Update UI
+                    renderVideos();
+                    renderAdminVideoList();
+                    
+                    // Show success feedback
+                    submitBtn.innerHTML = '<i class="fas fa-check"></i> Video Added!';
+                    setTimeout(() => {
+                        submitBtn.innerHTML = 'Add Video';
+                        submitBtn.disabled = false;
+                    }, 1500);
+                } catch (error) {
+                    console.error('Error uploading video:', error);
+                    alert('An error occurred while uploading the video');
+                    submitBtn.innerHTML = 'Add Video';
+                    submitBtn.disabled = false;
+                }
+            });
+
+            // Clean up object URLs when page is unloaded
+            window.addEventListener('beforeunload', function() {
+                videos.forEach(video => {
+                    if (video.url.startsWith('blob:')) {
+                        URL.revokeObjectURL(video.url);
+                    }
+                    if (video.thumbnail.startsWith('blob:')) {
+                        URL.revokeObjectURL(video.thumbnail);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
